@@ -32,7 +32,7 @@ loginForm.addEventListener("submit", async (event) => {
         // A successful response currently verifies credentials only.
         // Dashboard redirect will be enabled after sessions
         // and protected routes are implemented.
-        window.location.replace("/");
+        window.location.replace("/index.html");
 
     } catch (error) {
         errorMessage.style.color = "#c0392b";

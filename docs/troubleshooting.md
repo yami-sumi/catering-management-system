@@ -1,3 +1,13 @@
+## Current clone setup (November 2026)
+
+**Use the root `README.md` as the authoritative setup guide.** After cloning, each reviewer must create a private `backend/.env` from `backend/.env.example`, run the one-line Node.js secret generator, and enter their **own** PostgreSQL password. No shared secrets are published.
+
+Open `http://localhost:5000/` for the **public landing page**, `http://localhost:5000/customer.html` for the customer portal, and `http://localhost:5000/admin-login.html` for staff login. The staff dashboard remains protected at `/index.html`.
+
+The database must be created locally using `database/schema.sql` and `database/seed.sql`; create a staff account with `node create-admin.js` from `backend`. Do not commit `.env`.
+
+---
+
 # Troubleshooting
 
 This guide provides solutions to common problems encountered when installing and running the Catering Business Management System.

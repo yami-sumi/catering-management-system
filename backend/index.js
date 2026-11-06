@@ -78,7 +78,12 @@ app.use("/api/reservation-menu", requireAdmin, reservationMenuRoutes);
 const frontendPath = path.join(__dirname, "../frontend");
 
 // Protect the dashboard entry page
-app.get(["/", "/index.html"], (req, res) => {
+app.get("/", (req, res) => {
+    res.sendFile(path.join(frontendPath, "landing.html"));
+});
+
+// Keep the existing staff dashboard protected.
+app.get("/index.html", (req, res) => {
     if (!req.session || !req.session.adminId) {
         return res.redirect("/admin-login.html");
     }
