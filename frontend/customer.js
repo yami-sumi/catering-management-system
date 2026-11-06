@@ -20,7 +20,152 @@ $('bookingForm').elements.number_of_guests.addEventListener('input',estimate);$(
 $('bookingForm').onsubmit=async e=>{e.preventDefault();if(!selectedPackage)return notify('Select a catering package.',true);const form=e.target;const data=Object.fromEntries(new FormData(form));const menu_items=[...$('menu').querySelectorAll('input')].filter(i=>Number(i.value)>0).map(i=>({menu_item_id:Number(i.dataset.menuId),quantity:Number(i.value)}));try{const result=await api('/reservations',{method:'POST',body:JSON.stringify({...data,package_id:selectedPackage,number_of_guests:Number(data.number_of_guests),menu_items})});form.reset();form.elements.number_of_guests.value=50;$('menu').querySelectorAll('input').forEach(i=>i.value=0);estimate();await loadBookings();openPanel('bookings');notify(`Reservation #${result.reservation.reservation_id} submitted! Staff will review your request.`);}catch(e){notify(e.message,true)}};
 function openPanel(id){document.querySelectorAll('.account-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.panel===id));document.querySelectorAll('.tab-panel').forEach(p=>p.hidden=p.id!==id);}
 document.querySelectorAll('.account-tabs button').forEach(b=>b.onclick=()=>{openPanel(b.dataset.panel);$('notice').hidden=true;});
-async function loadBookings(){try{const rows=await api('/reservations');$('bookingList').innerHTML=rows.length?rows.map(r=>{const status=esc(r.status||'Pending');const extras=(r.menu_items||[]).map(m=>`${esc(m.item_name)} × ${Number(m.quantity)}`).join(', ');return `<article class="booking-card"><div class="row"><h4>${esc(r.event_type)} · #${r.reservation_id}</h4><span class="pill ${status.toLowerCase()}">${status}</span></div><p>${esc(r.package_name)} · ${esc(r.venue)}</p><div class="booking-meta"><span>Event date<b>${esc(String(r.event_date).slice(0,10))}</b></span><span>Guests<b>${Number(r.number_of_guests)}</b></span><span>Estimated package cost<b>${money(r.estimated_cost)}</b></span><span>Recorded paid amount<b>${money(r.paid_amount)}</b></span></div>${extras?`<p>Selected menu: ${extras}</p>`:''}${(r.payments||[]).length?`<p>Payments: ${r.payments.map(p=>`${money(p.payment_amount)} (${esc(p.payment_status)})`).join(' · ')}</p>`:''}${(r.cancellations||[]).length?`<p>Cancellation: ${r.cancellations.map(c=>esc(c.cancellation_status)).join(', ')}</p>`:''}<div class="booking-actions">${r.status==='Confirmed'?`<button type="button" class="outline" data-pay="${r.reservation_id}">Submit payment details</button>`:''}${['Pending','Confirmed'].includes(r.status)&&!(r.cancellations||[]).some(c=>['Pending','Processed'].includes(c.cancellation_status))?`<button type="button" class="outline" data-cancel="${r.reservation_id}">Request cancellation</button>`:''}</div></article>`}).join(''):'<p class="empty">No reservations yet. Choose a package and request your first event!</p>';}catch(e){notify(e.message,true)}}
+
+async function loadBookings() {
+    try {
+        const rows = await api('/reservations');
+
+        $('bookingList').innerHTML = rows.length
+            ? rows.map(r => {
+                const status = esc(r.status || 'Pending');
+
+                const extras = (r.menu_items || [])
+                    .map(m => `${esc(m.item_name)} × ${Number(m.quantity)}`)
+                    .join(', ');
+
+                // Calculate payment details
+                const totalCost = Number(r.estimated_cost) || 0;
+
+                const totalPaid = (r.payments || [])
+                    .filter(p => p.payment_status === 'Paid')
+                    .reduce((sum, p) =>
+                        sum + Number(p.payment_amount || 0), 0);
+
+                const remainingBalance = Math.max(
+                    0,
+                    Math.round((totalCost - totalPaid) * 100) / 100
+                );
+
+                const pendingAmount = (r.payments || [])
+                    .filter(p => p.payment_status === 'Pending')
+                    .reduce((sum, p) => sum + Number(p.payment_amount || 0), 0);
+                const availableToSubmit = Math.max(0, remainingBalance - pendingAmount);
+
+                const excessPayment = Math.max(
+                    0,
+                    totalPaid - totalCost
+                );
+
+                let overallPaymentStatus = 'Unpaid';
+
+                if (totalPaid > totalCost) {
+                    overallPaymentStatus = 'Overpaid';
+                } else if (totalPaid === totalCost) {
+                    overallPaymentStatus = 'Paid';
+                } else if (totalPaid > 0) {
+                    overallPaymentStatus = 'Partially Paid';
+                }
+
+                return `
+                    <article class="booking-card">
+                        <div class="row">
+                            <h4>${esc(r.event_type)} · #${r.reservation_id}</h4>
+                            <span class="pill ${status.toLowerCase()}">
+                                ${status}
+                            </span>
+                        </div>
+
+                        <p>${esc(r.package_name)} · ${esc(r.venue)}</p>
+
+                        <div class="booking-meta">
+                            <span>
+                                Event date
+                                <b>${esc(String(r.event_date).slice(0, 10))}</b>
+                            </span>
+
+                            <span>
+                                Guests
+                                <b>${Number(r.number_of_guests)}</b>
+                            </span>
+
+                            <span>
+                                Estimated package cost
+                                <b>${money(totalCost)}</b>
+                            </span>
+
+                            <span>
+                                Total paid
+                                <b>${money(totalPaid)}</b>
+                            </span>
+
+                            <span>
+                                Remaining balance
+                                <b>${money(remainingBalance)}</b>
+                            </span>
+
+                            <span>
+                                Payment status
+                                <b>${overallPaymentStatus}</b>
+                            </span>
+
+                            ${excessPayment > 0 ? `
+                                <span>
+                                    Excess payment
+                                    <b>${money(excessPayment)}</b>
+                                </span>
+                            ` : ''}
+                        </div>
+
+                        ${extras
+                            ? `<p>Selected menu: ${extras}</p>`
+                            : ''}
+
+                        ${(r.payments || []).length
+                            ? `<p>Payments: ${r.payments
+                                .map(p => `${money(p.payment_amount)} (${esc(p.payment_status)})`)
+                                .join(' · ')}</p>`
+                            : ''}
+
+                        ${(r.cancellations || []).length
+                            ? `<p>Cancellation: ${r.cancellations
+                                .map(c => esc(c.cancellation_status))
+                                .join(', ')}</p>`
+                            : ''}
+
+                        <div class="booking-actions">
+                            
+${r.status === 'Confirmed' && availableToSubmit > 0
+    ? `<button type="button" class="outline"
+         data-pay="${r.reservation_id}">
+         Submit payment details
+       </button>`
+    : ''}
+
+
+                            ${['Pending', 'Confirmed'].includes(r.status)
+                                && !(r.cancellations || []).some(
+                                    c => ['Pending', 'Processed']
+                                        .includes(c.cancellation_status)
+                                )
+                                ? `<button type="button" class="outline"
+                                     data-cancel="${r.reservation_id}">
+                                     Request cancellation
+                                   </button>`
+                                : ''}
+                        </div>
+                    </article>
+                `;
+            }).join('')
+            : `<p class="empty">
+                   No reservations yet. Choose a package and
+                   request your first event!
+               </p>`;
+
+    } catch (e) {
+        notify(e.message, true);
+    }
+}
+
 $('bookingList').addEventListener('click',async e=>{
  const pay=e.target.closest('[data-pay]'),cancel=e.target.closest('[data-cancel]');
  if(pay){const id=pay.dataset.pay;const method=prompt('Payment method: GCash, Maya, Bank Transfer, or Cash');if(method===null)return;const amount=prompt('Amount submitted (PHP)');if(amount===null)return;const reference=prompt('Payment reference number (for Cash: receipt/reference number)');if(reference===null)return;

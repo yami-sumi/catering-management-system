@@ -5,7 +5,7 @@ const money = (v) => (v === null || v === undefined ? "" :
     Number(v).toLocaleString("en-PH", { style: "currency", currency: "PHP" }));
 const fullName = (r) => `${r.first_name} ${r.last_name}`;
 const STATUS = {
-    reservation: ["Pending", "Confirmed", "Completed", "Cancelled", "Rejected"],
+    reservation: ["Pending", "Confirmed", "Completed", "Rejected"],
     payment: ["Pending", "Paid", "Refunded", "Failed"],
     inventory: ["Available", "Low Stock", "Unavailable"],
     cancellation: ["Pending", "Processed", "Rejected"],
@@ -357,3 +357,31 @@ setInterval(() => {
         load();
     }
 }, 5000);
+
+
+const logoutBtn = document.getElementById("logoutBtn");
+
+if (logoutBtn) {
+    logoutBtn.addEventListener("click", async () => {
+        logoutBtn.disabled = true;
+        logoutBtn.textContent = "Logging out...";
+
+        try {
+            const response = await fetch("/api/admin/logout", {
+                method: "POST",
+                credentials: "same-origin"
+            });
+
+            if (!response.ok) {
+                throw new Error("Logout failed.");
+            }
+
+            window.location.replace("/admin-login.html");
+
+        } catch (error) {
+            alert("Unable to log out. Please try again.");
+            logoutBtn.disabled = false;
+            logoutBtn.textContent = "Logout";
+        }
+    });
+}

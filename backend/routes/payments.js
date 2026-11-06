@@ -3,6 +3,89 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../db");
 
+// GET - Payment summary for a reservation
+router.get("/summary/:reservationId", async (req, res) => {
+    try {
+        const { reservationId } = req.params;
+
+        if (
+            !Number.isInteger(Number(reservationId)) ||
+            Number(reservationId) <= 0
+        ) {
+            return res.status(400).json({
+                message: "Invalid reservation ID."
+            });
+        }
+
+        const result = await pool.query(
+            `SELECT
+                r.reservation_id,
+                r.estimated_cost AS total_cost,
+                COALESCE(SUM(
+                    CASE
+                        WHEN p.payment_status = 'Paid'
+                        THEN p.payment_amount
+                        ELSE 0
+                    END
+                ), 0) AS total_paid
+             FROM reservation r
+             LEFT JOIN payment p
+                ON r.reservation_id = p.reservation_id
+             WHERE r.reservation_id = $1
+             GROUP BY r.reservation_id, r.estimated_cost`,
+            [reservationId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                message: "Reservation not found."
+            });
+        }
+
+        const { total_cost, total_paid } = result.rows[0];
+
+        if (total_cost === null) {
+            return res.status(409).json({
+                message: "Reservation estimated cost is not set."
+            });
+        }
+
+        // Calculate using integer centavos to avoid
+        // floating-point rounding errors.
+        const cost = Math.round(Number(total_cost) * 100);
+        const paid = Math.round(Number(total_paid) * 100);
+
+        const balance = Math.max(0, cost - paid);
+        const excess = Math.max(0, paid - cost);
+
+        let status = "Unpaid";
+
+        if (paid > cost) {
+            status = "Overpaid";
+        } else if (paid === cost) {
+            status = "Paid";
+        } else if (paid > 0) {
+            status = "Partially Paid";
+        }
+
+        res.json({
+            reservation_id: Number(reservationId),
+            total_cost: (cost / 100).toFixed(2),
+            total_paid: (paid / 100).toFixed(2),
+            remaining_balance: (balance / 100).toFixed(2),
+            excess_payment: (excess / 100).toFixed(2),
+            overall_payment_status: status
+        });
+
+    } catch (error) {
+        console.error("Payment summary error:", error.message);
+
+        res.status(500).json({
+            message: "Failed to calculate payment summary."
+        });
+    }
+});
+
 // GET - Retrieve all payments
 router.get("/", async (req, res) => {
     try {

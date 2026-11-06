@@ -1,0 +1,56 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Admin Login | Catering Management</title>
+    <link rel="stylesheet" href="admin-login.css">
+    <script src="admin-login.js" defer></script>
+</head>
+<body>
+    <main class="login-container">
+        <section class="login-card">
+            <div class="logo">✦</div>
+
+            <h1>Welcome Back</h1>
+            <p class="subtitle">
+                Catering Management System
+            </p>
+
+            <h2>Admin Login</h2>
+
+            <form id="loginForm">
+                <label for="username">Username</label>
+                <input
+                    type="text"
+                    id="username"
+                    autocomplete="username"
+                    placeholder="Enter your username"
+                    required
+                >
+
+                <label for="password">Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    autocomplete="current-password"
+                    placeholder="Enter your password"
+                    required
+                >
+
+                <p id="errorMessage" role="alert"></p>
+
+                <button type="submit" id="loginButton">
+                    Sign In
+                </button>
+            </form>
+
+            <p class="footer-text">
+                Authorized administrators only
+            </p>
+        </section>
+    </main>
+</body>
+</html>

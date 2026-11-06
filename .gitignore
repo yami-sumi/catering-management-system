@@ -23,3 +23,7 @@ npm-debug.log*
 # Operating system files
 .DS_Store
 Thumbs.db
+
+# Local backup copies that may contain credentials
+.env*.backup
+*.env.backup

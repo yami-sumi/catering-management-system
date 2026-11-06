@@ -1,0 +1,23 @@
+node_modules/
+.env
+
+
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Database backups
+*.backup
+*.dump
+
+# Logs
+*.log
+npm-debug.log*
+
+# System files
+.DS_Store
+Thumbs.db
