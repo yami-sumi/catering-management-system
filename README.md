@@ -51,7 +51,7 @@ Ensure that PostgreSQL is installed and its database service is running.
 Open a terminal or Command Prompt and execute:
 
 ```bash
-git clone https://github.com/yami-sumi/catering-management-system-management-system.git
+git clone https://github.com/yami-sumi/catering-management-system.git
 cd catering-management-system
 ```
 
