@@ -148,3 +148,17 @@ The Menu Item Management module was tested using Thunder Client. A temporary men
 Screenshots of the four operations are stored in `docs/activity3/screenshots/crud/`.
 
 **Result:** CRUD operations completed successfully, subject to confirmation of the saved response screenshots.
+
+### Cross-Group System Testing
+
+Group 8 participated in cross-group system testing and verification by evaluating the projects of other groups.
+
+Testing results were documented in the class Google Sheets tracker, including the assigned group, testing activity, result, and remarks.
+
+The visible tracker records show testing entries for Groups 01–07 and 09–11. Most recorded activities were marked successful, while some issues were reported for Groups 05 and 06.
+
+The testing activities included system execution, database configuration, access-control verification, database maintenance checks, and backup and recovery procedures.
+
+Issues encountered during testing were recorded in the tracker, along with observations regarding system configuration and execution.
+
+**Evidence:** Activity 3 Google Sheets cross-group testing tracker screenshot.
