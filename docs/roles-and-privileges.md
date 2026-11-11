@@ -3,75 +3,98 @@
 
 ### 1. Overview
 
-The Catering Business Management System is designed to support different users involved in managing catering services.
+The Catering Business Management System supports different users involved in managing catering services.
 
-Role-based access helps organize responsibilities and protect database information by allowing users to perform only the operations needed for their tasks.
+The system includes application-level user roles and PostgreSQL database roles. Application roles describe user responsibilities, while database roles control permissions for accessing and modifying database information.
 
-The roles and privileges described below are **proposed for the system design**. They are not yet implemented as PostgreSQL roles.
+The group implemented PostgreSQL roles and verified their existence, table privileges, and role membership using pgAdmin 4.
 
 ### 2. Application User Roles
 
-| Role | Responsibilities |
-|---|---|
-| Customer | View catering packages, submit reservations, and check reservation status |
-| Staff | View assigned events and assist with catering operations |
-| Administrator | Manage customers, packages, reservations, payments, inventory, employees, and cancellations |
+| Role | Responsibilities | Implementation Status |
+|---|---|---|
+| Customer | View catering packages, submit reservations, and check reservation status | Customer authentication and portal features included |
+| Staff | View assigned events and assist with catering operations | Proposed role; separate staff authentication not verified |
+| Administrator | Manage customers, packages, reservations, payments, inventory, employees, and cancellations | Administrator authentication and management features included |
 
-### 3. Proposed Database Roles
+Application user roles are separate from PostgreSQL database accounts. They are not automatically assigned the same privileges as database roles.
 
-| Database Role | Purpose |
-|---|---|
-| catering_admin | Manage database records and application operations |
-| catering_staff | Access and update information needed for daily catering activities |
-| catering_customer | Access permitted customer-facing information |
-| catering_readonly | View selected records for reports and verification |
+### 3. Implemented PostgreSQL Roles
 
-These are proposed PostgreSQL role names. They have not yet been created or granted privileges.
+The group created the following PostgreSQL roles using the role definitions in `database/roles.sql`.
 
-### 4. Proposed Database Privileges
+| Database Role | Type | Purpose |
+|---|---|---|
+| `app_admin_grp` | NOLOGIN | Administrative data-management privileges |
+| `app_runtime_grp` | NOLOGIN | Database permissions required by the backend |
+| `app_readonly_grp` | NOLOGIN | Read-only access to database tables |
+| `catering_app` | LOGIN | Application database account assigned to `app_runtime_grp` |
 
-The following table summarizes the intended access permissions.
+The three NOLOGIN roles organize database privileges. The LOGIN role is intended to connect to PostgreSQL and inherit permissions from its assigned group.
+
+### 4. Implemented Database Privileges
+
+The following table summarizes the privileges assigned to the existing tables in the `public` schema.
 
 | Database Role | SELECT | INSERT | UPDATE | DELETE |
 |---|---|---|---|---|
-| catering_admin | Yes | Yes | Yes | Yes |
-| catering_staff | Yes | Limited | Limited | No |
-| catering_customer | Limited | Limited | Limited | No |
-| catering_readonly | Yes | No | No | No |
+| `app_admin_grp` | Yes | Yes | Yes | Yes |
+| `app_runtime_grp` | Yes | Yes | Yes | Yes |
+| `app_readonly_grp` | Yes | No | No | No |
+| `catering_app` | Inherited | Inherited | Inherited | Inherited |
 
-**Limited** means access should be restricted to specific tables, columns, or authorized records.
+The `catering_app` account is a member of `app_runtime_grp` and inherits its privileges.
+
+The permissions above apply to all 12 existing tables in the public schema. They do not represent separate table-level restrictions for customers or staff.
 
 ### 5. Access Control Guidelines
 
-The system should follow these guidelines:
+The system follows these access-control guidelines as design principles:
 
-1. Users should receive only the permissions required for their responsibilities.
-2. Customer information should be protected from unauthorized access.
-3. Staff should only access information relevant to their assigned duties.
-4. Administrative operations should be restricted to authorized personnel.
-5. Database passwords and connection credentials should not be committed to GitHub.
-6. Database access should be reviewed when user responsibilities change.
+1. Assign database permissions according to user responsibilities.
+2. Protect customer and payment information from unauthorized access.
+3. Restrict administrative functions to authorized application users.
+4. Keep database credentials out of the public repository.
+5. Review database permissions when responsibilities change.
+6. Maintain separate application authentication and PostgreSQL database access controls.
+
+These guidelines describe security objectives. The existing table grants do not establish that every objective is fully enforced.
 
 ### 6. Database Connection Security
 
 The backend uses environment variables to configure its PostgreSQL connection.
 
-Sensitive information should be stored in `backend/.env`, which must remain excluded from Git version control.
+Sensitive credentials are stored locally in `backend/.env`, which should remain excluded from Git version control.
 
-The repository should provide `backend/.env.example` containing placeholder values so other developers can configure their own database connections.
+The repository includes `backend/.env.example` with placeholder configuration values for other developers.
 
-### 7. Implementation Status
+The PostgreSQL login role `catering_app` was created and assigned to the runtime group. Actual use of this login account by the backend must be confirmed through its environment configuration and a successful connection test.
 
-The current Activity 3 backend provides API endpoints for managing catering records.
+### 7. Implementation and Verification Status
 
-The application roles and database privileges described here are part of the proposed access-control design.
+The group implemented PostgreSQL roles in the `catering_management_db` database environment.
 
-**Application-level authentication, role authorization, and separate PostgreSQL role privileges have not been verified as implemented.**
+Verification was performed using SQL queries in pgAdmin 4.
 
-These features can be implemented and tested in a later development stage.
+| Verification | Result |
+|---|---|
+| Catering database tables | 12 tables found |
+| PostgreSQL role existence | Four roles confirmed |
+| PostgreSQL role types | Three NOLOGIN roles and one LOGIN role |
+| Table privileges | 36 role-table privilege summaries returned |
+| Application login membership | Checked using `pg_auth_members` |
+| Login-based allowed/denied operations | Not yet documented in this evidence set |
+
+The following screenshots are retained as supporting evidence:
+
+- `docs/activity-3/screenshots/01-postgresql-roles.png`
+- `docs/activity-3/screenshots/02-role-privileges.png`
+- `docs/activity-3/screenshots/03-role-membership.png`
+
+The SQL queries verify the recorded role definitions, table privileges, and membership. They do not independently prove that all application authorization rules or PostgreSQL permission restrictions work as intended.
 
 ### 8. Conclusion
 
-The proposed role structure separates customer, staff, and administrator responsibilities.
+The Catering Business Management System has implemented PostgreSQL roles for administrative data management, backend runtime operations, and read-only access.
 
-Documenting database privileges helps prepare the system for more secure access control while supporting future PostgreSQL role and permission testing.
+The group verified the role definitions and assigned table privileges through pgAdmin 4. This implementation supports the Activity 3 database access documentation and provides a foundation for further access-control testing and improvement.

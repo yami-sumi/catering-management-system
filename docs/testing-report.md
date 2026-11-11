@@ -72,7 +72,30 @@ An UPDATE request for Package ID 4 returned `Package not found`.
 
 After retrieving the package list, the temporary package was found with ID 8. The UPDATE operation was repeated using the correct ID and succeeded.
 
-### 7. Testing Results
+### 7. PostgreSQL Role and Privilege Verification
+
+PostgreSQL role verification was performed using pgAdmin 4 on the `catering_management_db` database.
+
+The group created three NOLOGIN group roles and one LOGIN role.
+
+| Test Case | Expected Result | Actual Result | Status |
+|---|---|---|---|
+| Verify PostgreSQL roles | Four Catering roles exist | Four roles found | Passed |
+| Verify role types | Three NOLOGIN and one LOGIN | Role types matched | Passed |
+| Verify table privileges | Assigned permissions appear on the database tables | 36 role-table privilege summaries returned | Passed |
+| Verify application role membership | `catering_app` belongs to `app_runtime_grp` | Membership checked in pgAdmin | Passed, if expected membership was returned |
+
+The verification confirmed that PostgreSQL roles were created and table permissions were assigned.
+
+The following screenshots were captured:
+
+- `01-postgresql-roles.png`
+- `02-role-privileges.png`
+- `03-role-membership.png`
+
+These tests verified role configuration and recorded privileges. Login-based permission enforcement was not part of this evidence set.
+
+### 8. Testing Results
 
 The testing demonstrated that the backend can communicate with PostgreSQL and perform CRUD operations across the eight tested API endpoints.
 
@@ -80,10 +103,48 @@ The database setup was also verified using a separate test database.
 
 **Overall Result:** CRUD testing was completed, with the final cancellation deletion response still requiring explicit confirmation for the evidence log.
 
-### 8. Conclusion
+### 9. Conclusion
 
 The Catering Business Management System successfully performed database setup and backend API operations during Activity 3 testing.
 
 The tests verified that the system can create, retrieve, update, and delete database records through its backend API.
 
 Further testing may include invalid inputs, foreign key constraints, database permissions, and deployment verification.
+
+### 10. Testing Evidence
+
+The group collected screenshots of the database and API testing activities.
+
+| Evidence | Description |
+|---|---|
+| PostgreSQL role creation | Four PostgreSQL roles verified using pgAdmin 4 |
+| PostgreSQL table privileges | Role permissions verified across 12 tables |
+| PostgreSQL role membership | Application login membership checked |
+| CREATE operation | Menu item created successfully, HTTP 201 |
+| READ operation | Catering packages retrieved successfully, HTTP 200 |
+| UPDATE operation | Customer information updated successfully, HTTP 200 |
+| Database verification | Menu item records retrieved through SQL |
+
+Additional API test results are documented in Section 4. Not every reported endpoint result has a corresponding screenshot in the current evidence set.
+
+### Activity 3 — CRUD Testing Evidence
+
+**Module Tested:** Menu Item Management  
+**Testing Tool:** Thunder Client (VS Code)  
+**Backend:** Node.js / Express  
+**Database:** PostgreSQL
+
+| Operation | HTTP Method | Endpoint | Expected Result |
+|---|---|---|---|
+| Create | POST | `/api/menu-items` | 201 Created |
+| Read | GET | `/api/menu-items` | 200 OK |
+| Update | PUT | `/api/menu-items/:id` | 200 OK |
+| Delete | DELETE | `/api/menu-items/:id` | Successful deletion |
+
+**Testing Summary:**
+
+The Menu Item Management module was tested using Thunder Client. A temporary menu item named "Activity 3 Test Burger" was created, retrieved, updated, and deleted through the REST API.
+
+Screenshots of the four operations are stored in `docs/activity3/screenshots/crud/`.
+
+**Result:** CRUD operations completed successfully, subject to confirmation of the saved response screenshots.
