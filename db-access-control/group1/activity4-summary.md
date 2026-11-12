@@ -54,3 +54,46 @@ Proposed GRANT/REVOKE statements were documented in `access-control-changes.sql`
 ## 7. Conclusion
 
 The tested PostgreSQL access restrictions were enforced successfully. Additional application-level verification is necessary to establish whether the complete role configuration meets operational and least-privilege requirements.
+
+
+## Feedback to Group 1 (DropBoxed)
+
+### Verified Strengths
+- Login accounts use separate NOLOGIN group roles.
+- Application permissions follow column-level restrictions.
+- Reporting access excludes tested sensitive columns.
+- Backup role has read-only table access.
+- DBA role has maintenance and monitoring privileges.
+- Sequence privileges match the access-control plan.
+- GRANT and REVOKE verification passed.
+
+### Observation: Cross-Database CONNECT Access
+
+The dropboxed_app account can connect to other
+databases where PUBLIC has CONNECT permission.
+
+This behavior is already acknowledged in Group 1's
+access-control documentation.
+
+Risk:
+The account can establish connections to unrelated
+databases, although this does not automatically
+grant access to their tables.
+
+Recommendation:
+For shared PostgreSQL servers, administrators
+should review database-level CONNECT permissions
+and restrict unnecessary access where practical.
+
+### Overall Assessment
+
+The tested permissions largely match the
+documented access-control plan.
+
+No confirmed critical access-control flaw was
+identified during these checks.
+
+The application INSERT operation test remains
+unverified and should not be marked as passed.
+
+Feedback status: Prepared, not yet sent.
