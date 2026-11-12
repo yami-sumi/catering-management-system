@@ -1,0 +1,4 @@
+-- Group 2 Activity 4: no permanent privilege modifications proposed at this stage.
+-- Existing privileges are applied by Flyway V3__app_privileges.sql.
+-- Do not execute other groups' SQL or modify the owner's repository without review.
+-- Documentation alignment and real-login permission tests remain follow-up items.
