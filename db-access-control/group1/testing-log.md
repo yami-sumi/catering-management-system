@@ -280,3 +280,66 @@ access-control plan.
 
 Evidence: screenshots/30-backup-sequence-permissions.png
 
+
+### AC-17: Automated Role-Based Privilege Verification
+
+Database: dropboxed_db
+Command: npm run db:verify
+
+| Account | Tests Passed |
+|---|---|
+| dropboxed_app | 22/22 |
+| dropboxed_report | 10/10 |
+| dropboxed_backup | 6/6 |
+| dropboxed_dba | 9/9 |
+| Outsider account | 1/1 |
+| Total | 48/48 |
+
+Status: PASS
+
+Actual Results:
+- 48 tests passed.
+- 0 unexpected results.
+- 0 roles with elevated attributes.
+- Allowed operations succeeded.
+- Restricted operations were denied.
+- Test operations were reported as rolled back.
+
+Evidence: privilege-results.md
+
+Note:
+The automated test verifies an INSERT into
+complaint_categories, but not creation of a
+complete new complaint.
+
+
+### AC-17: Automated Privilege Verification
+
+Database: dropboxed_db
+Command: npm run db:verify -- --out privilege-results.md
+
+| Account | Tests Passed |
+|---|---|
+| dropboxed_app | 22/22 |
+| dropboxed_report | 10/10 |
+| dropboxed_backup | 6/6 |
+| dropboxed_dba | 9/9 |
+| Outsider account | 1/1 |
+| Total | 48/48 |
+
+Status: PASS
+
+Actual Results:
+- 48 tests passed.
+- 0 unexpected results.
+- 0 roles with elevated attributes.
+- Allowed operations succeeded.
+- Denied operations were rejected as expected.
+- Test output reports operations as rolled back.
+
+Note:
+The automated verification includes a successful
+INSERT into complaint_categories, but does not
+verify creating a complete complaint record.
+
+Evidence: privilege-results.md

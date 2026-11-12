@@ -96,4 +96,47 @@ identified during these checks.
 The application INSERT operation test remains
 unverified and should not be marked as passed.
 
-Feedback status: Prepared, not yet sent.
+
+### Feedback Status
+
+Feedback for Group 1 (DropBoxed) is documented
+in this Activity 4 report.
+
+The feedback includes verified strengths,
+access-control observations, and recommendations.
+
+Status: Documented in the repository.
+Direct feedback to the owning group: Not sent.
+
+
+## Final Automated Privilege Verification
+
+Database: dropboxed_db
+Verification date: November 12, 2026
+
+The automated privilege verification was executed
+using Group 1's provided verification script.
+
+Results:
+- Total tests: 48
+- Passed: 48
+- Unexpected results: 0
+- Roles with elevated attributes: 0
+
+The tests covered:
+- Application role permissions
+- Reporting role restrictions
+- Backup role permissions
+- DBA maintenance and monitoring
+- Unauthorized database access
+
+Assessment:
+All 48 tested operations matched the expected
+results in Group 1's access-control plan.
+
+The application INSERT test for creating a complete
+complaint remains unverified.
+
+Evidence: privilege-results.md
+
+Feedback status: Prepared but not sent.
