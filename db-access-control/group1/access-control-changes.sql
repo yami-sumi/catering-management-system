@@ -60,3 +60,47 @@ FROM information_schema.tables
 WHERE table_schema = 'dropboxed'
   AND table_type = 'BASE TABLE'
 ORDER BY table_name;
+
+-- ACTIVITY 4: GROUP 1
+-- Temporary GRANT/REVOKE verification
+-- This test does not permanently modify existing roles.
+-- Execute in pgAdmin as postgres.
+
+BEGIN;
+
+CREATE ROLE dropboxed_ac4_verify NOLOGIN;
+
+GRANT USAGE ON SCHEMA dropboxed
+TO dropboxed_ac4_verify;
+
+GRANT SELECT ON dropboxed.complaints
+TO dropboxed_ac4_verify;
+
+CREATE TEMP TABLE ac4_results (
+    test_name TEXT,
+    result BOOLEAN
+);
+
+INSERT INTO ac4_results
+SELECT 'After GRANT',
+       has_table_privilege(
+           'dropboxed_ac4_verify',
+           'dropboxed.complaints',
+           'SELECT'
+       );
+
+REVOKE SELECT ON dropboxed.complaints
+FROM dropboxed_ac4_verify;
+
+INSERT INTO ac4_results
+SELECT 'After REVOKE',
+       has_table_privilege(
+           'dropboxed_ac4_verify',
+           'dropboxed.complaints',
+           'SELECT'
+       );
+
+SELECT * FROM ac4_results;
+
+-- Run ROLLBACK separately after recording results.
+-- ROLLBACK;

@@ -49,3 +49,38 @@ The `dropboxed_runtime_grp` role has DELETE privileges on `complaint_assignments
 These permissions should be reviewed against the application's intended functionality to determine whether they are necessary.
 
 **Assessment:** Both findings require further verification. They are not yet confirmed security flaws.
+
+### Finding AC-F03: Cross-Database CONNECT Access Through PUBLIC
+
+**Affected account:** `dropboxed_app`
+
+**Observation:** The application account has CONNECT privileges on seven unrelated databases, including Group 8's catering databases.
+
+**Cause:** These databases grant CONNECT to PUBLIC, allowing all PostgreSQL roles to inherit the privilege.
+
+**Security concern:** This creates broader database connection access than the application requires. CONNECT alone does not provide permission to read or modify tables.
+
+**Recommendation:** Review PUBLIC CONNECT privileges on unrelated application databases and replace unnecessary broad access with explicit grants to authorized roles.
+
+**Status:** Confirmed configuration concern; remediation pending.
+
+**Evidence:** `20-cross-database-connect.png` and `21-public-cross-database-access.png`.
+
+
+## Additional Permission Test
+
+### AC-08: GRANT and REVOKE Verification
+
+**Database:** dropboxed_db  
+**Role:** dropboxed_ac4_verify (temporary test role)
+
+**Objective:** Verify that PostgreSQL correctly applies GRANT and REVOKE commands.
+
+| Test | Expected Result | Actual Result | Status |
+|---|---|---|---|
+| GRANT SELECT | TRUE | Not yet confirmed | Pending |
+| REVOKE SELECT | FALSE | Not yet confirmed | Pending |
+
+**Evidence:** 23-grant-revoke-verification.png (if captured)
+
+**Note:** The test uses a temporary role. The changes are reversed using ROLLBACK to avoid modifying the existing application permissions.
