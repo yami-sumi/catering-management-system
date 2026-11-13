@@ -1,4 +1,4 @@
-# Group 8 – Batumbakal Gym
+# Group 9 – Batumbakal Gym
 ## Access Control Findings and Feedback
 
 ### Finding 1: Missing API Authentication and Authorization

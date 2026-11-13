@@ -1,4 +1,4 @@
-# Group 8 – Batumbakal Gym
+# Group 9 – Batumbakal Gym
 ## Database Access Control Testing Log
 
 **Reviewed System:** Batumbakal Gym Membership Management System  
